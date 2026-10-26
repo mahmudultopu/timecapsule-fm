@@ -4,6 +4,8 @@
 ![Node 24](https://img.shields.io/badge/node-24-339933)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
 
+**Live demo:** https://timecolapse.vercel.app (read-only demo mode with synthetic placeholder recordings; see [Demo deployment](#demo-deployment-vercel))
+
 An interactive map of ambient and environmental sound recorded in specific places across the decades. Every recording carries full provenance. Anything synthetic is labelled as a reconstruction, never presented as authentic.
 
 **Status:** all four slices are built and tested:

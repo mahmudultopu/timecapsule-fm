@@ -70,7 +70,7 @@ services:
       - ./storage/s3.json:/etc/seaweedfs/s3.json:ro
     ports: ['127.0.0.1:8333:8333'] # browsers use signed URLs against this
     healthcheck:
-      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:8333/status || exit 1']
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:9333/cluster/status || exit 1']
       interval: 5s
       retries: 30
 
@@ -134,7 +134,6 @@ services:
     networks: [backend]
     <<: *hardening
     tmpfs: ['/tmp:size=1g,mode=1777']
-    pids_limit: 128
     environment:
       <<: *s3-env
       NODE_ENV: production
@@ -148,7 +147,7 @@ services:
       migrate: { condition: service_completed_successfully }
     stop_grace_period: 2m
     deploy:
-      resources: { limits: { cpus: '1', memory: 1G } }
+      resources: { limits: { cpus: '1', memory: 1G, pids: 128 } }
 
   web:
     build: { context: .., target: web }

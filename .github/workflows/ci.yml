@@ -109,7 +109,15 @@ jobs:
         with: { node-version: '${{ env.NODE_VERSION }}', cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - name: Start stack
-        run: docker compose -f infra/docker-compose.yml up --build -d --wait
+        run: |
+          docker compose -f infra/docker-compose.yml up --build -d
+          # Wait for the app through the proxy (one-shot jobs like migrate exit by design).
+          for i in $(seq 1 90); do
+            curl -sf -o /dev/null http://localhost:8080/list && exit 0
+            sleep 4
+          done
+          docker compose -f infra/docker-compose.yml ps -a
+          exit 1
       - name: Seed demo data
         run: docker compose -f infra/docker-compose.yml --profile seed run --rm seed
       - run: pnpm --filter @timecapsule/e2e exec playwright install --with-deps chromium

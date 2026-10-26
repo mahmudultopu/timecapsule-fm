@@ -30,14 +30,38 @@ const s3 = new S3Client({
 });
 const origin = env('CORS_ORIGIN');
 
+/** Storage may still be starting (e.g. in docker compose); retry for a while. */
+async function withRetry<T>(fn: () => Promise<T>, attempts = 30): Promise<T> {
+  for (let i = 1; ; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (i >= attempts) throw err;
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+}
+
 async function ensureBucket(Bucket: string, rule: CORSRule) {
-  try {
-    await s3.send(new HeadBucketCommand({ Bucket }));
-  } catch {
-    await s3.send(new CreateBucketCommand({ Bucket }));
+  const exists = await withRetry(() =>
+    s3.send(new HeadBucketCommand({ Bucket })).then(
+      () => true,
+      (err: { $metadata?: { httpStatusCode?: number } }) => {
+        // 404 means "doesn't exist yet"; anything else (connection refused…) is retried.
+        if (err.$metadata?.httpStatusCode === 404) return false;
+        throw err;
+      },
+    ),
+  );
+  if (!exists) {
+    await withRetry(() => s3.send(new CreateBucketCommand({ Bucket })));
     console.log(`created bucket ${Bucket}`);
   }
-  await s3.send(new PutBucketCorsCommand({ Bucket, CORSConfiguration: { CORSRules: [rule] } }));
+  // R2 and AWS support bucket CORS; some local S3 stand-ins allow all origins
+  // and don't implement this call, which is fine for development.
+  await s3
+    .send(new PutBucketCorsCommand({ Bucket, CORSConfiguration: { CORSRules: [rule] } }))
+    .catch((err: Error) => console.warn(`${Bucket}: could not set CORS (${err.name}); check the store's CORS settings`));
   // Not every S3-compatible store implements this; buckets are private by default regardless.
   await s3
     .send(

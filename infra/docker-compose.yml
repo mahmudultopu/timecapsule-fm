@@ -67,10 +67,12 @@ services:
   storage:
     image: chrislusf/seaweedfs:4.50
     networks: [backend, edge]
-    command: ['server', '-dir=/data', '-s3', '-s3.port=8333', '-s3.config=/etc/seaweedfs/s3.json']
+    # Local/CI only: no IAM config, so the S3 API accepts any credentials.
+    # It is reachable only on 127.0.0.1 and the internal network.
+    # Production uses R2 (or S3) with real credentials.
+    command: ['server', '-dir=/data', '-s3', '-s3.port=8333']
     volumes:
       - s3data:/data
-      - ./storage/s3.json:/etc/seaweedfs/s3.json:ro
     ports: ['127.0.0.1:8333:8333'] # browsers use signed URLs against this
     healthcheck:
       test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:9333/cluster/status || exit 1']

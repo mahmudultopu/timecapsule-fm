@@ -8,7 +8,6 @@ useDefault = true
 description = "Local development and test fixtures"
 paths = [
   '''infra/docker-compose\.yml''',
-  '''infra/storage/s3\.json''',
   '''\.env\.example''',
   '''(^|/)test/.*''',
   '''e2e/tests/.*''',

@@ -1,9 +1,0 @@
-{
-  "identities": [
-    {
-      "name": "local-dev",
-      "credentials": [{ "accessKey": "tc-dev-access", "secretKey": "tc-dev-secret-change-me" }],
-      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
-    }
-  ]
-}

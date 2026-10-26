@@ -70,7 +70,9 @@ services:
     # Local/CI only: no IAM config, so the S3 API accepts any credentials.
     # It is reachable only on 127.0.0.1 and the internal network.
     # Production uses R2 (or S3) with real credentials.
-    command: ['server', '-dir=/data', '-s3', '-s3.port=8333']
+    # Bind every interface: the container sits on two networks, and the port
+    # published for browsers arrives via the edge network, not the first one.
+    command: ['server', '-dir=/data', '-ip=storage', '-ip.bind=0.0.0.0', '-s3', '-s3.port=8333']
     volumes:
       - s3data:/data
     ports: ['127.0.0.1:8333:8333'] # browsers use signed URLs against this

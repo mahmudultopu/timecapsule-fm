@@ -1,0 +1,30 @@
+{
+  "name": "timecapsule-fm",
+  "private": true,
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "e2e": "pnpm --filter @timecapsule/e2e e2e",
+    "db:migrate": "pnpm --filter @timecapsule/db migrate",
+    "db:seed": "pnpm --filter @timecapsule/db seed",
+    "openapi:export": "pnpm --filter @timecapsule/api openapi:export",
+    "audit": "pnpm audit --audit-level=high --prod"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.6.5",
+    "eslint": "10.13.0",
+    "globals": "17.13.0",
+    "turbo": "2.11.9",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2",
+    "vitest": "5.0.5"
+  }
+}

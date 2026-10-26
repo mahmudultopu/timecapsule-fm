@@ -1,0 +1,12 @@
+packages:
+  - apps/*
+  - packages/*
+  - e2e
+
+# Supply-chain hardening: refuse to resolve any version published less than
+# 7 days ago (minutes), and never run dependency lifecycle scripts unless
+# the package is explicitly allow-listed here.
+minimumReleaseAge: 10080
+onlyBuiltDependencies:
+  - esbuild
+  - sharp

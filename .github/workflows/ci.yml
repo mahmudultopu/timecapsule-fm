@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24.22.1'
+  PNPM_VERSION: '10.34.9'
+
+jobs:
+  checks:
+    name: Lint, types, unit & integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v5
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      # The worker's privacy tests run real ffmpeg (metadata stripping, probing).
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - run: pnpm lint
+      - run: pnpm typecheck
+      # DB tests run against PGlite (real Postgres + PostGIS in WASM): RLS, triggers, constraints.
+      - run: pnpm test
+      - name: OpenAPI spec is up to date
+        run: pnpm openapi:export && git diff --exit-code docs/openapi.json
+      - run: pnpm --filter @timecapsule/web build
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v5
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: pnpm }
+      - run: pnpm audit --prod --audit-level=high
+      - if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with: { fail-on-severity: high }
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  postgis:
+    name: Migrations on real PostGIS
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_DB: timecapsule
+          POSTGRES_PASSWORD: ci-superuser
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 20
+    env:
+      PGPASSWORD: ci-superuser
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v5
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Create roles (same script as docker-compose)
+        run: |
+          docker exec -e POSTGRES_USER=postgres -e POSTGRES_DB=timecapsule \
+            -e TC_MIGRATOR_PASSWORD=m -e TC_API_PASSWORD=a -e TC_WORKER_PASSWORD=w -e TC_AUTH_PASSWORD=x \
+            ${{ job.services.postgres.id }} sh -c "$(cat infra/postgres/01-roles.sh)"
+      - name: Migrate twice (idempotent) as the non-superuser owner
+        env:
+          DATABASE_MIGRATOR_URL: postgres://tc_migrator:m@localhost:5432/timecapsule
+        run: pnpm db:migrate && pnpm db:migrate
+      - name: API login role cannot bypass RLS
+        run: |
+          psql -h localhost -U tc_api_login -d timecapsule -v ON_ERROR_STOP=1 \
+            -c "INSERT INTO recordings (contributor_id) VALUES (gen_random_uuid())" && exit 1 || echo "blocked as expected"
+        env: { PGPASSWORD: a }
+
+  e2e:
+    name: E2E (browse, play, contribute, moderate, takedown)
+    runs-on: ubuntu-latest
+    needs: [checks]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v5
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Start stack
+        run: docker compose -f infra/docker-compose.yml up --build -d --wait
+      - name: Seed demo data
+        run: docker compose -f infra/docker-compose.yml --profile seed run --rm seed
+      - run: pnpm --filter @timecapsule/e2e exec playwright install --with-deps chromium
+      - run: pnpm e2e
+        env:
+          E2E_BASE_URL: 'http://localhost:8080'
+          # Signed-in flows create their session rows directly (see e2e/tests/support.ts).
+          E2E_DATABASE_URL: 'postgres://postgres:dev-superuser-password@localhost:5432/timecapsule'
+          E2E_SESSION_COOKIE: 'authjs.session-token'
+      - if: failure()
+        run: docker compose -f infra/docker-compose.yml logs --no-color > compose.log
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+            compose.log
+          retention-days: 7

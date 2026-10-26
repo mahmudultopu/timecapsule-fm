@@ -1,0 +1,16 @@
+# Secret scanning config. The default rules apply; the paths below contain
+# only throwaway local-development values (clearly marked "dev-only" /
+# "CHANGE_ME") and test fixtures, never real credentials.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Local development and test fixtures"
+paths = [
+  '''infra/docker-compose\.yml''',
+  '''infra/storage/s3\.json''',
+  '''\.env\.example''',
+  '''(^|/)test/.*''',
+  '''e2e/tests/.*''',
+  '''\.github/workflows/ci\.yml''',
+]

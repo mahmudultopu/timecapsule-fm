@@ -1,0 +1,187 @@
+# Local / CI stack. Every secret below is a throwaway development value;
+# production secrets come from the platform's secret manager, never this file.
+#
+#   docker compose -f infra/docker-compose.yml up --build -d --wait
+#   docker compose -f infra/docker-compose.yml --profile seed run --rm seed
+#   open http://localhost:8080          (app)
+#   open http://localhost:8025          (Mailpit: sign-in links and notifications)
+
+name: timecapsule
+
+x-hardening: &hardening
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  tmpfs: [/tmp]
+
+x-s3-env: &s3-env
+  S3_ENDPOINT: http://storage:8333
+  S3_PUBLIC_ENDPOINT: http://localhost:8333
+  S3_REGION: us-east-1
+  S3_FORCE_PATH_STYLE: 'true'
+  S3_ACCESS_KEY_ID: tc-dev-access
+  S3_SECRET_ACCESS_KEY: tc-dev-secret-change-me
+  S3_BUCKET_MEDIA: tc-media
+  S3_BUCKET_QUARANTINE: tc-quarantine
+
+networks:
+  # Reaches the outside world (browser-facing services, OAuth from the web app).
+  edge: {}
+  # No route to the internet. The transcoding worker lives only here.
+  backend:
+    internal: true
+
+services:
+  postgres:
+    image: postgis/postgis:17-3.5
+    networks: [backend, edge]
+    environment:
+      POSTGRES_DB: timecapsule
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: dev-superuser-password
+      TC_MIGRATOR_PASSWORD: dev-migrator-password
+      TC_API_PASSWORD: dev-api-password
+      TC_WORKER_PASSWORD: dev-worker-password
+      TC_AUTH_PASSWORD: dev-auth-password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/01-roles.sh:/docker-entrypoint-initdb.d/01-roles.sh:ro
+    ports: ['127.0.0.1:5432:5432'] # local tools and E2E session setup only
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d timecapsule']
+      interval: 5s
+      retries: 20
+
+  valkey:
+    image: valkey/valkey:9.0.6-alpine3.24
+    networks: [backend]
+    command: ['valkey-server', '--save', '', '--appendonly', 'no']
+    <<: *hardening
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 5s
+
+  storage:
+    image: chrislusf/seaweedfs:4.50
+    networks: [backend, edge]
+    command: ['server', '-dir=/data', '-s3', '-s3.port=8333', '-s3.config=/etc/seaweedfs/s3.json']
+    volumes:
+      - s3data:/data
+      - ./storage/s3.json:/etc/seaweedfs/s3.json:ro
+    ports: ['127.0.0.1:8333:8333'] # browsers use signed URLs against this
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:8333/status || exit 1']
+      interval: 5s
+      retries: 30
+
+  mailpit:
+    image: axllent/mailpit:v1.31.6
+    networks: [backend, edge]
+    ports: ['127.0.0.1:8025:8025']
+
+  # One-shot: migrations + bucket/CORS setup. Runs before anything else.
+  migrate:
+    build: { context: .., target: tools }
+    networks: [backend]
+    environment:
+      <<: *s3-env
+      DATABASE_MIGRATOR_URL: postgres://tc_migrator:dev-migrator-password@postgres:5432/timecapsule
+      CORS_ORIGIN: http://localhost:8080
+    command: ['sh', '-c', 'pnpm db:migrate && pnpm --filter @timecapsule/db storage:init']
+    depends_on:
+      postgres: { condition: service_healthy }
+      storage: { condition: service_healthy }
+
+  # Demo data (synthetic placeholders). Opt-in: `--profile seed`.
+  seed:
+    profiles: [seed]
+    build: { context: .., target: tools }
+    networks: [backend]
+    environment:
+      <<: *s3-env
+      DATABASE_MIGRATOR_URL: postgres://tc_migrator:dev-migrator-password@postgres:5432/timecapsule
+      NODE_ENV: development
+    command: ['pnpm', 'db:seed']
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  api:
+    build: { context: .., target: api }
+    networks: [backend, edge]
+    <<: *hardening
+    environment:
+      <<: *s3-env
+      NODE_ENV: production
+      APP_ORIGIN: http://localhost:8080
+      DATABASE_URL: postgres://tc_api_login:dev-api-password@postgres:5432/timecapsule
+      REDIS_URL: redis://valkey:6379
+      AUDIT_IP_HMAC_KEY: dev-only-audit-hmac-key-change-me-000000
+      METRICS_TOKEN: dev-only-metrics-token-change-me-0000000
+      SESSION_COOKIE_NAME: authjs.session-token
+      TRUST_PROXY_HOPS: '1'
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      valkey: { condition: service_healthy }
+    deploy:
+      resources: { limits: { cpus: '1', memory: 512M } }
+
+  # Transcoding runs here and only here: no internet (backend network only,
+  # so it can reach Postgres, storage and the mail relay and nothing else),
+  # read-only root, non-root user, all capabilities dropped, and hard CPU /
+  # memory / process limits. Docker's default seccomp profile applies.
+  worker:
+    build: { context: .., target: worker }
+    networks: [backend]
+    <<: *hardening
+    tmpfs: ['/tmp:size=1g,mode=1777']
+    pids_limit: 128
+    environment:
+      <<: *s3-env
+      NODE_ENV: production
+      DATABASE_URL: postgres://tc_worker_login:dev-worker-password@postgres:5432/timecapsule
+      WORK_DIR: /tmp/tc-work
+      FFMPEG_TIMEOUT_MS: '600000'
+      SMTP_URL: smtp://mailpit:1025
+      MAIL_FROM: TimeCapsule.fm <no-reply@timecapsule.test>
+      APP_ORIGIN: http://localhost:8080
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    stop_grace_period: 2m
+    deploy:
+      resources: { limits: { cpus: '1', memory: 1G } }
+
+  web:
+    build: { context: .., target: web }
+    networks: [backend, edge]
+    <<: *hardening
+    environment:
+      API_INTERNAL_URL: http://api:4000
+      DATABASE_AUTH_URL: postgres://tc_auth_login:dev-auth-password@postgres:5432/timecapsule
+      REDIS_URL: redis://valkey:6379
+      AUTH_SECRET: dev-only-auth-secret-change-me-0000000000
+      AUTH_TRUST_HOST: 'true'
+      AUTH_URL: http://localhost:8080/auth
+      SMTP_URL: smtp://mailpit:1025
+      MAIL_FROM: TimeCapsule.fm <no-reply@timecapsule.test>
+      AUDIT_IP_HMAC_KEY: dev-only-audit-hmac-key-change-me-000000
+      MEDIA_ORIGINS: http://localhost:8333
+      # Dev basemap. Production: a self-hosted PMTiles style (see docs/architecture.md).
+      MAP_STYLE_URL: https://tiles.openfreemap.org/styles/positron
+      TAKEDOWN_EMAIL: legal@example.com
+    tmpfs: [/tmp, /app/apps/web/.next/cache]
+    depends_on:
+      api: { condition: service_healthy }
+    deploy:
+      resources: { limits: { cpus: '1', memory: 512M } }
+
+  proxy:
+    image: caddy:2.11.7-alpine
+    networks: [edge]
+    ports: ['127.0.0.1:8080:80']
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on: [web, api]
+
+volumes:
+  pgdata:
+  s3data:

@@ -1,0 +1,24 @@
+# Single public origin: the web app at /, the API at /api (prefix stripped).
+# In production put TLS here (Caddy obtains certificates automatically for a
+# real domain) and keep the API and web containers off the public network.
+{
+	admin off
+}
+
+:80 {
+	encode zstd gzip
+	header -Server
+
+	# `route` keeps this literal order (Caddy otherwise sorts directives).
+	route {
+		# Ops endpoints are scraped/used on the internal network only.
+		respond /api/metrics 404
+		respond /api/docs* 404
+
+		handle_path /api/* {
+			reverse_proxy api:4000
+		}
+
+		reverse_proxy web:3000
+	}
+}

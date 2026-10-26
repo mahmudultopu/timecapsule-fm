@@ -56,6 +56,9 @@ services:
     image: valkey/valkey:9.0.6-alpine3.24
     networks: [backend]
     command: ['valkey-server', '--save', '', '--appendonly', 'no']
+    # Start as the image's unprivileged user directly: its entrypoint would
+    # otherwise need setuid capabilities to drop from root.
+    user: '999:999'
     <<: *hardening
     healthcheck:
       test: ['CMD', 'valkey-cli', 'ping']

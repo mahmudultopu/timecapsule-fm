@@ -1,21 +1,64 @@
+<div align="center">
+
 # TimeCapsule.fm
+
+**Listen to the sound of places across the decades — with the full story of every recording.**
+
+[![Live demo](https://img.shields.io/badge/live%20demo-timecolapse.vercel.app-a4471f?style=for-the-badge)](https://timecolapse.vercel.app)
 
 [![CI](https://github.com/mahmudultopu/timecolapse/actions/workflows/ci.yml/badge.svg)](https://github.com/mahmudultopu/timecolapse/actions/workflows/ci.yml)
 ![Node 24](https://img.shields.io/badge/node-24-339933)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-000000)
+![PostGIS](https://img.shields.io/badge/PostgreSQL-PostGIS-336791)
+![WCAG 2.2 AA](https://img.shields.io/badge/a11y-WCAG%202.2%20AA-1f6f4a)
 
-**Live demo:** https://timecolapse.vercel.app (read-only demo mode with synthetic placeholder recordings; see [Demo deployment](#demo-deployment-vercel))
+<a href="https://timecolapse.vercel.app"><img src="docs/screenshots/explore.png" alt="The map explorer: a world map with recording pins, a filter panel with a decade slider, an open recording with its provenance, and the audio player playing at the bottom" width="100%"></a>
 
-An interactive map of ambient and environmental sound recorded in specific places across the decades. Every recording carries full provenance. Anything synthetic is labelled as a reconstruction, never presented as authentic.
+</div>
 
-**Status:** all four slices are built and tested:
+TimeCapsule.fm is an interactive map of ambient and environmental sound: a Tokyo crossing in 1982, a New York subway platform in 1995, a Paris café in 1970. Every recording carries full provenance: where the audio came from, how sure the date is, who recorded it, and who holds the rights. Anything synthetic is labelled as a reconstruction and never presented as authentic.
 
-- **Browse & play:** map, list, recording pages, persistent player.
-- **Contribute:** sign-in, signed uploads, a sandboxed transcoding worker, the metadata editor.
-- **Moderate:** review queue with a checklist, plus contributor notifications by email and in-app.
-- **Takedown:** public request form and moderator resolution.
+> **Live demo:** [timecolapse.vercel.app](https://timecolapse.vercel.app) runs in read-only demo mode with five clearly labelled *synthetic placeholder* recordings. Sign-in, uploads and moderation need the full backend; see [Demo deployment](#demo-deployment-vercel).
 
-See [docs/architecture.md](docs/architecture.md) and [docs/threat-model.md](docs/threat-model.md).
+## Features
+
+| | |
+|---|---|
+| 🗺️ **Map explorer** | Clustered pins, a decade time slider, and filters by sound, license and place. The selection is shareable by URL |
+| 🎧 **Listening** | A persistent Web Audio player with a waveform, seek, ±10 s skip and loop. It keeps playing while you pan the map or change pages |
+| 📜 **Provenance on everything** | Source type, date confidence, recorder, location precision, rights and license. The database refuses incomplete or misleading records |
+| ⬆️ **Contributions** | Passwordless sign-in, uploads straight to storage, a guided editor with autosave, and a map location picker |
+| 🛡️ **Sandboxed processing** | Magic-byte checks and isolated ffmpeg with no network. All metadata (GPS, device) is stripped and verified, and originals are deleted |
+| ✅ **Moderation** | A review queue with a four-point checklist, reasons sent to contributors, and takedown handling with a full audit trail |
+| 🌍 **For everyone** | English, Arabic (right-to-left) and Japanese, keyboard-friendly list views, WCAG 2.2 AA colours, and reduced-motion support |
+| 🔒 **Security by default** | Row-level security, short-lived signed URLs, a nonce CSP, CSRF protection, rate limits and privacy-safe logs |
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/list.png" alt="List view: recording cards with play buttons, filters and reconstruction labels"><br><sub><b>List view</b>: keyboard-friendly, with every filter</sub></td>
+    <td width="50%"><img src="docs/screenshots/recording.png" alt="Recording page: title in English and Arabic, scene description, and the provenance panel"><br><sub><b>Recording page</b>: local-language names and full provenance</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><img src="docs/screenshots/mobile-arabic.png" alt="The list page on a phone in Arabic, laid out right-to-left" width="60%"><br><sub><b>Mobile, in Arabic</b>: a complete right-to-left layout</sub></td>
+    <td width="50%"><img src="docs/screenshots/recording-japanese.png" alt="The Tokyo recording page with the interface in Japanese"><br><sub><b>Japanese interface</b>: every UI string is translated</sub></td>
+  </tr>
+</table>
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Web | Next.js 16 (App Router), React 19, Tailwind CSS 4, MapLibre GL, next-intl, Auth.js |
+| API | Fastify 5, Zod 4, OpenAPI 3.1 (generated), Kysely |
+| Worker | Node.js, ffmpeg (sandboxed), Postgres `LISTEN/NOTIFY` queue |
+| Data | PostgreSQL 17 + PostGIS, row-level security, S3-compatible storage, Valkey/Redis |
+| Quality | Vitest, PGlite (Postgres in WASM), Playwright + axe, ESLint, strict TypeScript |
+| Ops | Docker, Caddy, GitHub Actions, Dependabot, gitleaks, Vercel (demo) |
+
+**Status:** all four slices are built and tested: browse & play, contribute, moderate, and takedown. See [docs/architecture.md](docs/architecture.md) and [docs/threat-model.md](docs/threat-model.md).
 
 ## Layout
 

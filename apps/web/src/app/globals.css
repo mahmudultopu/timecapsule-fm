@@ -1,0 +1,249 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Every text/background pair used in the UI meets WCAG 2.2 AA
+ * (4.5:1), and focus rings meet 3:1; test/design.test.ts checks this.
+ */
+@theme {
+  --color-paper: #f7f3ec;
+  --color-card: #fffdf9;
+  --color-ink: #121a2c;
+  --color-muted: #4b5266;
+  --color-line: #e3dccf;
+  --color-accent: #a4471f;
+  --color-accent-soft: #f4e3d7;
+  --color-focus: #1d4ed8;
+  --color-night: #0e1424;
+  --color-night-2: #1a2236;
+  --color-mist: #b7bfd3;
+  --color-glow: #e8946a;
+  --color-success: #1f6f4a;
+  --color-success-bg: #e3f2ea;
+  --color-danger: #a12a2a;
+  --color-danger-bg: #fbe6e4;
+  --color-warn-bg: #fff1c2;
+  --color-warn-ink: #5c4300;
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, 'Segoe UI', 'Noto Sans', 'Noto Sans Arabic', 'Noto Sans JP', sans-serif;
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, 'Noto Serif', 'Noto Naskh Arabic', 'Noto Serif JP', serif;
+
+  --shadow-soft: 0 1px 2px rgb(18 26 44 / 0.06), 0 8px 24px -12px rgb(18 26 44 / 0.18);
+  --shadow-lift: 0 2px 4px rgb(18 26 44 / 0.08), 0 18px 40px -16px rgb(18 26 44 / 0.35);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-fade-up: fade-up 420ms var(--ease-out-soft) both;
+  --animate-slide-in: slide-in 380ms var(--ease-out-soft) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateX(var(--slide-from, 24px)); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes eq {
+    0%, 100% { transform: scaleY(0.3); }
+    50% { transform: scaleY(1); }
+  }
+}
+
+@layer base {
+  html {
+    color: var(--color-ink);
+    background: var(--color-paper);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  [dir='rtl'] {
+    --slide-from: -24px;
+  }
+  h1, h2, .font-display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  ::selection {
+    background: var(--color-accent-soft);
+  }
+  /* Everything that moves stops moving for people who asked for less motion. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-soft);
+  }
+  .glass {
+    background: rgb(255 253 249 / 0.86);
+    backdrop-filter: blur(14px) saturate(1.4);
+    border: 1px solid rgb(227 220 207 / 0.9);
+    box-shadow: var(--shadow-lift);
+  }
+  .glass-night {
+    background: rgb(14 20 36 / 0.92);
+    backdrop-filter: blur(16px) saturate(1.3);
+    color: var(--color-paper);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: transform 160ms var(--ease-out-soft), background-color 160ms, box-shadow 160ms, color 160ms;
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-night-2);
+    box-shadow: var(--shadow-soft);
+  }
+  .btn-accent {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .btn-accent:hover:not(:disabled) {
+    background: #8d3c19;
+  }
+  .btn-secondary {
+    border: 1px solid var(--color-line);
+    background: var(--color-card);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    border-color: var(--color-muted);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: rgb(18 26 44 / 0.06);
+  }
+  .btn-danger {
+    background: var(--color-danger);
+    color: #fff;
+  }
+  .btn-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem; /* ≥ 24×24 target size (WCAG 2.5.8); 44px for touch */
+    border-radius: 9999px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    transition: transform 160ms var(--ease-out-soft), background-color 160ms, box-shadow 200ms;
+  }
+  .btn-icon:hover:not(:disabled) {
+    box-shadow: 0 0 0 6px rgb(164 71 31 / 0.14);
+  }
+  .btn-icon:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+  .btn-icon:disabled {
+    opacity: 0.6;
+  }
+
+  .field {
+    width: 100%;
+    min-height: 2.5rem;
+    border: 1px solid #c9c1b2;
+    border-radius: 0.625rem;
+    background: #fff;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 140ms, box-shadow 140ms;
+  }
+  .field:hover {
+    border-color: var(--color-muted);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 3px rgb(29 78 216 / 0.22);
+  }
+  .field[aria-invalid='true'] {
+    border-color: var(--color-danger);
+  }
+  .label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  .help {
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+    margin-top: 0.25rem;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    background: rgb(18 26 44 / 0.06);
+  }
+
+  .skeleton {
+    border-radius: 0.5rem;
+    background: linear-gradient(90deg, #ece6da 25%, #f6f1e8 50%, #ece6da 75%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+
+  /* Three animated bars marking the item that is currently playing. */
+  .eq {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 0.875rem;
+  }
+  .eq > span {
+    width: 3px;
+    height: 100%;
+    border-radius: 2px;
+    background: currentColor;
+    transform-origin: bottom;
+    animation: eq 900ms ease-in-out infinite;
+  }
+  .eq > span:nth-child(2) { animation-delay: -300ms; }
+  .eq > span:nth-child(3) { animation-delay: -600ms; }
+  .eq[data-paused='true'] > span {
+    animation-play-state: paused;
+  }
+}

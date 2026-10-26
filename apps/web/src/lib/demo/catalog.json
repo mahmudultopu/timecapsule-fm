@@ -1,0 +1,247 @@
+[
+  {
+    "id": "e6430e37-3d87-4418-be3e-bf2d8d278bd5",
+    "title": {
+      "en": "[DEMO — synthetic placeholder] Shibuya Crossing",
+      "local": "[DEMO — synthetic placeholder] 渋谷スクランブル交差点",
+      "localLang": "ja"
+    },
+    "place": {
+      "nameEn": "Shibuya Crossing",
+      "nameLocal": "渋谷スクランブル交差点",
+      "cityEn": "Tokyo",
+      "cityLocal": "東京",
+      "countryCode": "JP"
+    },
+    "category": "street",
+    "eraYear": 1982,
+    "decade": 1980,
+    "durationMs": 20000,
+    "location": {
+      "lat": 35.66,
+      "lon": 139.706211,
+      "precision": "neighborhood_1km"
+    },
+    "provenance": {
+      "sourceType": "community_reconstruction",
+      "dateConfidence": "exact",
+      "capturedFrom": "2026-10-26",
+      "capturedTo": "2026-10-26",
+      "recorderName": "TimeCapsule.fm demo generator",
+      "locationPrecision": "neighborhood_1km",
+      "rightsStatus": "contributor_owns",
+      "license": "cc0",
+      "rightsHolder": "TimeCapsule.fm",
+      "attribution": "Synthetic placeholder audio by TimeCapsule.fm (CC0)",
+      "speechConsent": "no_identifiable_speech",
+      "syntheticDisclosure": "Procedurally generated noise and tones, created on 2026-10-26 as a development placeholder. This is not a recording of Shibuya Crossing and does not represent how it sounded in the 1980s."
+    },
+    "contributor": {
+      "displayName": "TimeCapsule.fm demo"
+    },
+    "isDemo": true,
+    "publishedAt": "2026-10-26T00:00:00.000Z",
+    "sceneDescription": {
+      "en": "Placeholder evoking a large pedestrian crossing: a bed of low traffic noise that swells and fades, with a short electronic signal tone every few seconds.",
+      "local": "大きな交差点を想起させるプレースホルダー音：低い交通騒音と、数秒ごとの短い電子信号音。"
+    },
+    "audioFile": "/demo/tokyo-1982.wav",
+    "peaksFile": "/demo/tokyo-1982.peaks.json"
+  },
+  {
+    "id": "01007813-94fb-45bd-b9da-ce22fd9a3b9e",
+    "title": {
+      "en": "[DEMO — synthetic placeholder] Times Square subway platform",
+      "local": null,
+      "localLang": null
+    },
+    "place": {
+      "nameEn": "Times Sq–42 St station",
+      "nameLocal": null,
+      "cityEn": "New York",
+      "cityLocal": null,
+      "countryCode": "US"
+    },
+    "category": "transit",
+    "eraYear": 1995,
+    "decade": 1990,
+    "durationMs": 20000,
+    "location": {
+      "lat": 40.755,
+      "lon": -73.987336,
+      "precision": "site_100m"
+    },
+    "provenance": {
+      "sourceType": "community_reconstruction",
+      "dateConfidence": "exact",
+      "capturedFrom": "2026-10-26",
+      "capturedTo": "2026-10-26",
+      "recorderName": "TimeCapsule.fm demo generator",
+      "locationPrecision": "site_100m",
+      "rightsStatus": "contributor_owns",
+      "license": "cc0",
+      "rightsHolder": "TimeCapsule.fm",
+      "attribution": "Synthetic placeholder audio by TimeCapsule.fm (CC0)",
+      "speechConsent": "no_identifiable_speech",
+      "syntheticDisclosure": "Procedurally generated noise and tones, created on 2026-10-26 as a development placeholder. This is not a recording of Times Sq–42 St station and does not represent how it sounded in the 1990s."
+    },
+    "contributor": {
+      "displayName": "TimeCapsule.fm demo"
+    },
+    "isDemo": true,
+    "publishedAt": "2026-10-26T00:00:00.000Z",
+    "sceneDescription": {
+      "en": "Placeholder evoking an underground platform: a low rumble builds as a train approaches and recedes, followed by a two-note door chime.",
+      "local": null
+    },
+    "audioFile": "/demo/new-york-1995.wav",
+    "peaksFile": "/demo/new-york-1995.peaks.json"
+  },
+  {
+    "id": "34247623-5a16-41a3-ba5a-847c4a0bd3ab",
+    "title": {
+      "en": "[DEMO — synthetic placeholder] Latin Quarter café",
+      "local": "[DEMO — synthetic placeholder] Café du Quartier latin",
+      "localLang": "fr"
+    },
+    "place": {
+      "nameEn": "Latin Quarter",
+      "nameLocal": "Quartier latin",
+      "cityEn": "Paris",
+      "cityLocal": "Paris",
+      "countryCode": "FR"
+    },
+    "category": "cafe",
+    "eraYear": 1970,
+    "decade": 1970,
+    "durationMs": 20000,
+    "location": {
+      "lat": 48.85,
+      "lon": 2.34031,
+      "precision": "neighborhood_1km"
+    },
+    "provenance": {
+      "sourceType": "community_reconstruction",
+      "dateConfidence": "exact",
+      "capturedFrom": "2026-10-26",
+      "capturedTo": "2026-10-26",
+      "recorderName": "TimeCapsule.fm demo generator",
+      "locationPrecision": "neighborhood_1km",
+      "rightsStatus": "contributor_owns",
+      "license": "cc0",
+      "rightsHolder": "TimeCapsule.fm",
+      "attribution": "Synthetic placeholder audio by TimeCapsule.fm (CC0)",
+      "speechConsent": "no_identifiable_speech",
+      "syntheticDisclosure": "Procedurally generated noise and tones, created on 2026-10-26 as a development placeholder. This is not a recording of Latin Quarter and does not represent how it sounded in the 1970s."
+    },
+    "contributor": {
+      "displayName": "TimeCapsule.fm demo"
+    },
+    "isDemo": true,
+    "publishedAt": "2026-10-26T00:00:00.000Z",
+    "sceneDescription": {
+      "en": "Placeholder evoking a café interior: soft, diffuse room noise with occasional sharp clicks standing in for cups and saucers. No voices.",
+      "local": "Son de substitution évoquant l'intérieur d'un café : bruit de salle doux, avec quelques clics secs à la place des tasses. Aucune voix."
+    },
+    "audioFile": "/demo/paris-1970.wav",
+    "peaksFile": "/demo/paris-1970.peaks.json"
+  },
+  {
+    "id": "aee8712c-3dec-4fc9-b1e0-a75c05797036",
+    "title": {
+      "en": "[DEMO — synthetic placeholder] Nile riverbank at dusk",
+      "local": "[DEMO — synthetic placeholder] ضفاف النيل عند الغروب",
+      "localLang": "ar"
+    },
+    "place": {
+      "nameEn": "Nile Corniche",
+      "nameLocal": "كورنيش النيل",
+      "cityEn": "Cairo",
+      "cityLocal": "القاهرة",
+      "countryCode": "EG"
+    },
+    "category": "nature",
+    "eraYear": 1965,
+    "decade": 1960,
+    "durationMs": 20000,
+    "location": {
+      "lat": 30,
+      "lon": 31.292385,
+      "precision": "city_10km"
+    },
+    "provenance": {
+      "sourceType": "community_reconstruction",
+      "dateConfidence": "exact",
+      "capturedFrom": "2026-10-26",
+      "capturedTo": "2026-10-26",
+      "recorderName": "TimeCapsule.fm demo generator",
+      "locationPrecision": "city_10km",
+      "rightsStatus": "contributor_owns",
+      "license": "cc0",
+      "rightsHolder": "TimeCapsule.fm",
+      "attribution": "Synthetic placeholder audio by TimeCapsule.fm (CC0)",
+      "speechConsent": "no_identifiable_speech",
+      "syntheticDisclosure": "Procedurally generated noise and tones, created on 2026-10-26 as a development placeholder. This is not a recording of Nile Corniche and does not represent how it sounded in the 1960s."
+    },
+    "contributor": {
+      "displayName": "TimeCapsule.fm demo"
+    },
+    "isDemo": true,
+    "publishedAt": "2026-10-26T00:00:00.000Z",
+    "sceneDescription": {
+      "en": "Placeholder evoking a riverbank: gently moving water noise with a short rising bird-like chirp every few seconds.",
+      "local": "صوت بديل يوحي بضفة نهر: ضجيج ماء هادئ مع زقزقة قصيرة صاعدة كل بضع ثوانٍ."
+    },
+    "audioFile": "/demo/cairo-1965.wav",
+    "peaksFile": "/demo/cairo-1965.peaks.json"
+  },
+  {
+    "id": "43ea7303-c7a5-4807-9910-9779518b9473",
+    "title": {
+      "en": "[DEMO — synthetic placeholder] Don Valley steelworks",
+      "local": null,
+      "localLang": null
+    },
+    "place": {
+      "nameEn": "Lower Don Valley",
+      "nameLocal": null,
+      "cityEn": "Sheffield",
+      "cityLocal": null,
+      "countryCode": "GB"
+    },
+    "category": "industrial",
+    "eraYear": 1978,
+    "decade": 1970,
+    "durationMs": 20000,
+    "location": {
+      "lat": 53.4,
+      "lon": -1.425637,
+      "precision": "neighborhood_1km"
+    },
+    "provenance": {
+      "sourceType": "community_reconstruction",
+      "dateConfidence": "exact",
+      "capturedFrom": "2026-10-26",
+      "capturedTo": "2026-10-26",
+      "recorderName": "TimeCapsule.fm demo generator",
+      "locationPrecision": "neighborhood_1km",
+      "rightsStatus": "contributor_owns",
+      "license": "cc0",
+      "rightsHolder": "TimeCapsule.fm",
+      "attribution": "Synthetic placeholder audio by TimeCapsule.fm (CC0)",
+      "speechConsent": "no_identifiable_speech",
+      "syntheticDisclosure": "Procedurally generated noise and tones, created on 2026-10-26 as a development placeholder. This is not a recording of Lower Don Valley and does not represent how it sounded in the 1970s."
+    },
+    "contributor": {
+      "displayName": "TimeCapsule.fm demo"
+    },
+    "isDemo": true,
+    "publishedAt": "2026-10-26T00:00:00.000Z",
+    "sceneDescription": {
+      "en": "Placeholder evoking heavy industry: a steady electrical hum with a regular, percussive thump below it.",
+      "local": null
+    },
+    "audioFile": "/demo/sheffield-1978.wav",
+    "peaksFile": "/demo/sheffield-1978.peaks.json"
+  }
+]

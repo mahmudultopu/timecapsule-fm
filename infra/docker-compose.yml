@@ -33,7 +33,7 @@ networks:
 
 services:
   postgres:
-    image: postgis/postgis:17-3.5
+    image: postgis/postgis:18-3.6
     networks: [backend, edge]
     environment:
       POSTGRES_DB: timecapsule

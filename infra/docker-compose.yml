@@ -65,7 +65,7 @@ services:
       interval: 5s
 
   storage:
-    image: chrislusf/seaweedfs:4.50
+    image: chrislusf/seaweedfs:4.52
     networks: [backend, edge]
     # Local/CI only: no IAM config, so the S3 API accepts any credentials.
     # It is reachable only on 127.0.0.1 and the internal network.

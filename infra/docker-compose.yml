@@ -181,7 +181,7 @@ services:
       resources: { limits: { cpus: '1', memory: 512M } }
 
   proxy:
-    image: caddy:2.11.7-alpine
+    image: caddy:2.11.9-alpine
     networks: [edge]
     ports: ['127.0.0.1:8080:80']
     volumes:
